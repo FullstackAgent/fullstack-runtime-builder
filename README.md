@@ -34,20 +34,54 @@ docker run -it --rm \
 
 ### Building from Source
 
-Due to security restrictions in some environments, you may need to build this image in an environment with proper Docker or Buildah permissions.
+The image can be built using multiple methods, including automated GitHub Actions builds for environments with restrictions.
 
-#### Option 1: Using the Build Script
+#### Option 1: GitHub Actions (Recommended for Restricted Environments)
+
+This method uses GitHub Actions to build the image in the cloud, perfect for environments without Docker access:
 
 ```bash
-# Set your Docker Hub credentials
-export DOCKER_HUB_NAME=your_username
-export DOCKER_HUB_PASSWD=your_password
+# First, set up GitHub repository secrets:
+# Go to: https://github.com/FullstackAgent/fullstack-runtime-builder/settings/secrets
+# Add two secrets:
+#   - DOCKER_HUB_USERNAME: your Docker Hub username
+#   - DOCKER_HUB_PASSWORD: your Docker Hub password
 
-# Run the build script
-./build.sh
+# Method A: Trigger via Web UI
+# Go to: https://github.com/FullstackAgent/fullstack-runtime-builder/actions
+# Click "Build and Push Docker Image" → "Run workflow"
+
+# Method B: Trigger via GitHub CLI
+gh workflow run docker-build.yml -f tag="latest"
+
+# Method C: Automatic trigger on push
+# The workflow automatically runs when you push changes to Dockerfile
 ```
 
-#### Option 2: Manual Build with Docker
+#### Option 2: Using the Build Script
+
+The build script supports both local and GitHub Actions builds:
+
+```bash
+# Show help
+./build.sh --help
+
+# Trigger GitHub Actions build
+./build.sh --github
+
+# Build locally (requires Docker/Buildah/Podman)
+./build.sh --local
+
+# Build with specific tag
+./build.sh --github v1.0.0
+
+# For local builds with push to Docker Hub:
+export DOCKER_HUB_NAME=your_username
+export DOCKER_HUB_PASSWD=your_password
+./build.sh --local
+```
+
+#### Option 3: Manual Build with Docker
 
 ```bash
 # Build the image
@@ -58,7 +92,7 @@ docker login
 docker push fullstackagent/fullstack-web-runtime:latest
 ```
 
-#### Option 3: Manual Build with Buildah (for rootless environments)
+#### Option 4: Manual Build with Buildah (for rootless environments)
 
 ```bash
 # Build with Buildah
