@@ -129,6 +129,11 @@ RUN apt-get update && apt-get install -y \
     exa \
     && rm -rf /var/lib/apt/lists/*
 
+# Install ttyd for web-based terminal access
+RUN wget -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/latest/download/ttyd.x86_64 && \
+    chmod +x /tmp/ttyd && \
+    mv /tmp/ttyd /usr/local/bin/ttyd
+
 # Create working directory
 WORKDIR /workspace
 
@@ -136,8 +141,15 @@ WORKDIR /workspace
 RUN useradd -m -s /bin/bash developer && \
     echo 'developer ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Expose common ports for web development
-EXPOSE 3000 3001 5000 5173 8080 8000 5432
+EXPOSE 3000 3001 5000 5173 8080 8000 5432 7681
+
+# Set entrypoint to run ttyd as daemon
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Set default command
 CMD ["/bin/bash"]

@@ -12,6 +12,7 @@ This runtime includes:
 - **shadcn/ui** - Modern React component library with Tailwind CSS
 - **Claude Code CLI** - AI-powered coding assistant
 - **Buildah** - Container building tool that works in unprivileged mode
+- **ttyd** - Web-based terminal access for remote development
 - **Development Tools** - Git, GitHub CLI, ripgrep, and more
 
 ## Quick Start
@@ -75,6 +76,8 @@ buildah push fullstackagent/fullstack-web-runtime:latest docker://fullstackagent
 
 The runtime supports the following environment variables:
 
+### Core Configuration
+
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `ANTHROPIC_BASE_URL` | Base URL for Anthropic API | - | No |
@@ -83,6 +86,20 @@ The runtime supports the following environment variables:
 | `ANTHROPIC_SMALL_FAST_MODEL` | Fast model for quick operations | - | No |
 | `DOCKER_HUB_NAME` | Docker Hub username for pushing images | - | For pushing |
 | `DOCKER_HUB_PASSWD` | Docker Hub password for pushing images | - | For pushing |
+
+### ttyd Web Terminal Configuration
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `TTYD_PORT` | Port for web terminal access | 7681 | No |
+| `TTYD_USERNAME` | Username for authentication | - | No |
+| `TTYD_PASSWORD` | Password for authentication | - | No |
+| `TTYD_INTERFACE` | Network interface to bind | 0.0.0.0 | No |
+| `TTYD_BASE_PATH` | Base URL path for ttyd | / | No |
+| `TTYD_MAX_CLIENTS` | Maximum concurrent clients (0=unlimited) | 0 | No |
+| `TTYD_READONLY` | Enable read-only mode | false | No |
+| `TTYD_ALLOW_ORIGIN` | CORS allow origin header | * | No |
+| `DISABLE_TTYD` | Disable ttyd completely | false | No |
 
 ### Setting Environment Variables
 
@@ -103,6 +120,59 @@ Or use an `.env` file:
 docker run -it --rm \
   --env-file .env \
   -v $(pwd):/workspace \
+  fullstackagent/fullstack-web-runtime:latest
+```
+
+## Web Terminal Access (ttyd)
+
+The runtime includes ttyd, providing secure web-based terminal access. This is particularly useful for:
+- Remote development environments
+- Cloud-based IDEs
+- Product demonstrations
+- Educational platforms
+
+### Basic Usage
+
+```bash
+# Run with default ttyd configuration (port 7681, no auth)
+docker run -it --rm -p 7681:7681 fullstackagent/fullstack-web-runtime:latest
+
+# Access the web terminal at: http://localhost:7681
+```
+
+### Secure Usage with Authentication
+
+```bash
+# Run with authentication enabled
+docker run -it --rm \
+  -p 7681:7681 \
+  -e TTYD_USERNAME=admin \
+  -e TTYD_PASSWORD=secretpassword \
+  fullstackagent/fullstack-web-runtime:latest
+```
+
+### Custom Configuration
+
+```bash
+# Run with custom port and path
+docker run -it --rm \
+  -p 8080:8080 \
+  -e TTYD_PORT=8080 \
+  -e TTYD_BASE_PATH=/terminal \
+  -e TTYD_USERNAME=developer \
+  -e TTYD_PASSWORD=secure123 \
+  fullstackagent/fullstack-web-runtime:latest
+
+# Access at: http://localhost:8080/terminal
+```
+
+### Disable ttyd
+
+If you don't need web terminal access:
+
+```bash
+docker run -it --rm \
+  -e DISABLE_TTYD=true \
   fullstackagent/fullstack-web-runtime:latest
 ```
 
@@ -161,6 +231,7 @@ The following ports are exposed by default:
 - `8080` - General web server
 - `8000` - Django/FastAPI
 - `5432` - PostgreSQL connection
+- `7681` - ttyd web terminal interface
 
 ## Volume Mounts
 
@@ -201,6 +272,9 @@ Recommended volume mounts:
 - Buildah (rootless container builds)
 - Podman
 - Skopeo
+
+### Web Terminal
+- ttyd (web-based terminal with authentication support)
 
 ### Utilities
 - ripgrep (fast search)
