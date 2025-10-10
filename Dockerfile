@@ -126,8 +126,12 @@ RUN apt-get update && apt-get install -y \
     ripgrep \
     fd-find \
     bat \
-    exa \
     && rm -rf /var/lib/apt/lists/*
+
+# Install eza (modern replacement for exa)
+RUN wget -c https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz -O - | tar xz && \
+    chmod +x eza && \
+    mv eza /usr/local/bin/
 
 # Install ttyd for web-based terminal access
 RUN wget -O /tmp/ttyd https://github.com/tsl0922/ttyd/releases/latest/download/ttyd.x86_64 && \
